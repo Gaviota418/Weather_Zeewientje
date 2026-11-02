@@ -10,6 +10,7 @@ Een meteogram voor het WeatherXM-station op wijngaard Zeewientje. Het toont de m
 | `apps-script/Api.gs` | Web-app: serveert de pagina (`/exec`) en de data als JSON (`/exec?format=json`) |
 | `apps-script/Index.html` | De app zelf, zoals ze in Apps Script staat (met `<?!= … ?>`-sjabloon voor de eigen URL) |
 | `index.html` | Losse kopie van de app voor GitHub Pages (zonder sjabloon; de `/exec`-URL vul je in de app in) |
+| `manifest.webmanifest`, `icons/` | App-icoon en gegevens voor beginscherm (iPad) en Dock (Mac) |
 | `docs/installatie.md` | Installatie- en bijwerkhandleiding |
 
 ## Snel starten

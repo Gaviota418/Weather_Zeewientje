@@ -28,7 +28,10 @@ Vereist Weg A met toegang **Anyone**.
 2. Open `https://gaviota418.github.io/Weather_Zeewientje/`.
 3. Klap **Instellingen** open, plak je `/exec`-URL → *Opslaan en laden*.
    (Of open de pagina met `?api=<je /exec-URL>` erachter.)
-4. Delen → *Zet op beginscherm*.
+4. Zet de app met eigen icoon op je toestel:
+   - **iPad/iPhone:** Safari → Delen → *Zet op beginscherm*.
+   - **Mac:** Safari → Archief → *Voeg toe aan Dock*.
+5. Open de app vanaf het beginscherm of de Dock en plak de `/exec`-URL nog één keer onder **Instellingen**. Een app op het beginscherm of in de Dock onthoudt zijn eigen instellingen, los van Safari.
 
 ## Problemen
 
