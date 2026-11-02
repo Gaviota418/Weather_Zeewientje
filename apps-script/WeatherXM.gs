@@ -203,6 +203,50 @@ function updateWeatherXM_HourlyForecast() {
     getOrCreateSheet(ss, "Weather_Forecast_Hourly"),
     rows
   );
+
+  archiveForecast_(ss, rows);
+}
+
+/**
+ * Bewaart de verwachting voor MORGEN (Belgische tijd) in het tabblad "Verwachting_archief",
+ * zodat de app later kan vergelijken met wat het station echt mat. Eén keer per dag; 60 dagen bewaard.
+ * Kolommen (Api.gs leest ze op positie): 0 archived_at, 1 target_day, 2 source_timestamp,
+ * 3 temperature, 4 humidity, 5 precipitation_period, 6 precipitation_probability, 7 wind_speed_kmh.
+ */
+function archiveForecast_(ss, rows) {
+  const TZ = "Europe/Brussels";
+  const sheet = getOrCreateSheet(ss, "Verwachting_archief");
+  const HEAD = ["archived_at", "target_day", "source_timestamp", "temperature", "humidity",
+                "precipitation_period", "precipitation_probability", "wind_speed_kmh"];
+  if (sheet.getLastRow() === 0) sheet.getRange(1, 1, 1, HEAD.length).setValues([HEAD]);
+  sheet.getRange("B:C").setNumberFormat("@");   /* dag en tijdstip als tekst bewaren, niet als datum */
+  const dagVan = v => v instanceof Date ? Utilities.formatDate(v, TZ, "yyyy-MM-dd") : String(v);
+
+  const morgen = Utilities.formatDate(new Date(Date.now() + 24 * 3600e3), TZ, "yyyy-MM-dd");
+
+  /* al gearchiveerd voor morgen (bv. tweede run op dezelfde dag)? dan niets doen */
+  if (sheet.getLastRow() > 1) {
+    const dagen = sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).getValues().map(r => dagVan(r[0]));
+    if (dagen.indexOf(morgen) >= 0) return;
+  }
+
+  const nu = new Date();
+  const nieuw = rows
+    .filter(r => r.source_timestamp && Utilities.formatDate(new Date(r.source_timestamp), TZ, "yyyy-MM-dd") === morgen)
+    .map(r => [nu, morgen, String(r.source_timestamp), r.temperature, r.humidity,
+               r.precipitation_period, r.precipitation_probability, r.wind_speed_kmh]);
+  if (nieuw.length) sheet.getRange(sheet.getLastRow() + 1, 1, nieuw.length, HEAD.length).setValues(nieuw);
+
+  /* ouder dan 60 dagen opruimen */
+  const grens = Utilities.formatDate(new Date(Date.now() - 60 * 24 * 3600e3), TZ, "yyyy-MM-dd");
+  const n = sheet.getLastRow() - 1;
+  if (n > 0) {
+    const dagen = sheet.getRange(2, 2, n, 1).getValues().map(r => dagVan(r[0]));
+    let oud = 0;
+    while (oud < dagen.length && dagen[oud] < grens) oud++;
+    if (oud > 0) sheet.deleteRows(2, oud);
+  }
+  Logger.log(nieuw.length + " uur verwachting gearchiveerd voor " + morgen + ".");
 }
 
 function buildWeather_Combined() {
